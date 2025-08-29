@@ -9,7 +9,7 @@ import { BASE_URL } from "../utils/constants";
 const Navbar = () => {
   const navigate = useNavigate();
   const user = useSelector((store) => store.user);
-  console.log(user);
+  // console.log(user);
   const dispatch = useDispatch();
 
   const Logout = async (e) => {
@@ -36,18 +36,18 @@ const Navbar = () => {
         <a className="btn btn-ghost text-xl">👨‍💻 DevTinder</a>
       </div>
 
-      {user && user ? (
+      {user ? (
         <div className="flex gap-2">
           <div className="dropdown dropdown-end mr-5">
             <div className="flex items-center gap-2">
-              <p>Welcome, {user.firstName}</p>{" "}
+              <p>Welcome, {user.data.firstName}</p>{" "}
               <div
                 tabIndex={0}
                 role="button"
                 className="btn btn-ghost btn-circle avatar"
               >
                 <div className="w-10 rounded-full">
-                  <img alt="user photo" src={user.photoUrl} />
+                  <img alt="user photo" src={user.data.photoUrl} />
                 </div>
               </div>
             </div>

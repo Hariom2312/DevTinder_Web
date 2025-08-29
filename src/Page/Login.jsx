@@ -36,7 +36,7 @@ const Login = () => {
       localStorage.setItem("token", token);
       toast.success("Login Success ✅");
       dispatch(addUser(res.data.user));
-      navigate("/");
+      return navigate("/");
     } catch (error) {
       console.log(error.res?.data || error.message);
       toast.error(error.res?.message || "Login failed ❌");

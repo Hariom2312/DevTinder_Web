@@ -7,6 +7,7 @@ import ForgotPassword from "./Page/ForgotPassword";
 import NewPassword from "./Page/NewPassword";
 import Feed from "./Page/Feed";
 import { ToastContainer } from "react-toastify";
+import EditProfile from "./Page/EditProfile";
 
 import { Provider } from "react-redux";
 import appStore from "./utils/appStore";
@@ -21,6 +22,7 @@ function App() {
             <Route path="/" element={<Feed />} />
             <Route path="/login" element={<Login />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/editprofile" element={<EditProfile />} />
           </Route>
 
           <Route path="/forgot_password" element={<ForgotPassword />} />
