@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SaveIcon from "@mui/icons-material/Save";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
@@ -6,13 +6,15 @@ import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { BASE_URL } from "../utils/constants";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
-import { addUser, removeUser } from "../utils/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { addUser } from "../utils/userSlice";
+import { useNavigate } from "react-router-dom";
 
 export default function EditProfile() {
+  const user = useSelector((store) => store.user);
   const fileRef = useRef(null);
   const [preview, setPreview] = useState("");
-  const [skills, setSkills] = useState(["React", "Node.js"]);
+  const [skills, setSkills] = useState([]);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -21,8 +23,39 @@ export default function EditProfile() {
     gender: "",
     about: "",
   });
-  const dispatch = useDispatch();
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Load user from backend on page load
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(BASE_URL + "/profile/view", {
+          withCredentials: true,
+        });
+        dispatch(addUser(res.data));
+
+        setForm({
+          firstName: res.data?.data?.firstName || "",
+          lastName: res.data?.data?.lastName || "",
+          password: "",
+          age: res.data?.data?.age || "",
+          gender: res.data?.data?.gender || "",
+          about: res.data?.data?.about || "",
+        });
+        setSkills(res.data?.data?.skills || []);
+        setPreview(res.data?.data?.photoUrl || "");
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load profile");
+      }
+    };
+
+    fetchUser();
+  }, [dispatch,navigate]);
+
+  // Handle photo upload
   const onPhotoChange = (file) => {
     if (!file) return;
     const reader = new FileReader();
@@ -30,6 +63,7 @@ export default function EditProfile() {
     reader.readAsDataURL(file);
   };
 
+  // Handle skills
   const addSkill = (value) => {
     const v = value.trim();
     if (!v || skills.includes(v)) return;
@@ -46,23 +80,25 @@ export default function EditProfile() {
     }
   };
 
+  // Handle form change
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const data = {
-    firstName:form.firstName,
-    lastName:form?.lastName,
-    password:form.password,
-    photoUrl:preview || undefined,
-    gender:form.gender,
-    age:form.age,
-    about:form.about,
-    skills,
-  };
-
+  // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const data = {
+      firstName: form.firstName,
+      lastName: form?.lastName,
+      password: form.password,
+      photoUrl: preview || undefined,
+      gender: form.gender,
+      age: form.age,
+      about: form.about,
+      skills,
+    };
 
     try {
       const res = await axios.patch(
@@ -71,27 +107,33 @@ export default function EditProfile() {
         { withCredentials: true }
       );
       toast.success(res.data.message);
-      console.log(res.data);
-      dispatch(removeUser(res.data));
+
+      // Update redux with new data
       dispatch(addUser(res.data));
+
+      // Redirect back to profile
+      return navigate("/profile");
     } catch (error) {
       console.log(error);
       toast.error(error.response?.data?.message || "Something went wrong");
+      if (error.status === 401) {
+        return navigate("/login");
+      }
     }
-    console.log(form);
   };
 
+  // Reset form
   const handleReset = () => {
     setForm({
-      firstName: "",
-      lastName: "",
+      firstName: user?.data?.firstName || "",
+      lastName: user?.data?.lastName || "",
       password: "",
-      age: "",
-      gender: "",
-      about: "",
+      age: user?.data?.age || "",
+      gender: user?.data?.gender || "",
+      about: user?.data?.about || "",
     });
-    setSkills(["React", "Node.js"]);
-    setPreview("");
+    setSkills(user?.data?.skills || []);
+    setPreview(user?.data?.photoUrl || "");
   };
 
   return (
@@ -99,9 +141,6 @@ export default function EditProfile() {
       <div className="card w-full max-w-4xl bg-base-100 shadow-xl rounded-2xl">
         <div className="card-body">
           <h2 className="card-title text-2xl">Edit Profile</h2>
-          <p className="text-sm text-gray-500">
-            First name & password are required.
-          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6 mt-4">
             {/* Left: Photo */}
@@ -187,10 +226,10 @@ export default function EditProfile() {
                   <input
                     type="password"
                     name="password"
-                    required
                     value={form.password}
                     onChange={handleChange}
                     placeholder="••••••••"
+                    autoComplete="current-password"
                     className="input input-bordered w-full"
                   />
                 </div>
@@ -203,8 +242,8 @@ export default function EditProfile() {
                     name="age"
                     value={form.age}
                     onChange={handleChange}
-                    min={0}
-                    max={120}
+                    min={18}
+                    max={60}
                     placeholder="e.g. 22"
                     className="input input-bordered w-full"
                   />
@@ -283,3 +322,4 @@ export default function EditProfile() {
     </div>
   );
 }
+

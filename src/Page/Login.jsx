@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import LoginImg from "../assets/loginImg.jpg";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
@@ -10,8 +10,8 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { BASE_URL } from "../utils/constants";
 
 const Login = () => {
-  const [email, setEmail] = useState("dhakadhariom007@gmail.com");
-  const [password, setPassword] = useState("Radha@2002");
+  const [email, setEmail] = useState("Balram@gmail.com");
+  const [password, setPassword] = useState("Balram@2002");
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [eye, setEye] = useState(true);
@@ -31,11 +31,13 @@ const Login = () => {
         },
         { withCredentials: true }
       );
+      console.log(res.data.data);
 
       const { token } = res.data;
       localStorage.setItem("token", token);
       toast.success("Login Success ✅");
-      dispatch(addUser(res.data.user));
+      dispatch(addUser(res.data.data));
+      // console.log("res.data.data",res.data.data);
       return navigate("/");
     } catch (error) {
       console.log(error.res?.data || error.message);
@@ -80,9 +82,9 @@ const Login = () => {
                     <div onClick={()=>setEye(!eye)} className="flex items-center">{eye ? <VisibilityIcon/> : <VisibilityOffIcon/>}</div>
                   </div>
                   <div>
-                    <a href="/forgot_password" className="link link-hover">
+                    <Link to="/forgot_password" className="link link-hover">
                       Forgot password?
-                    </a>
+                    </Link>
                   </div>
                   <button type="submit" className="btn btn-neutral mt-4">
                     Login

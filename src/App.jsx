@@ -11,6 +11,8 @@ import EditProfile from "./Page/EditProfile";
 
 import { Provider } from "react-redux";
 import appStore from "./utils/appStore";
+import Request from "./Page/Request";
+import Friends from "./Page/Friends";
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/editprofile" element={<EditProfile />} />
+            <Route path="/request" element={<Request />} />
+            <Route path="/friends" element={<Friends />} />
           </Route>
 
           <Route path="/forgot_password" element={<ForgotPassword />} />
