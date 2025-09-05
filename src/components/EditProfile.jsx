@@ -9,7 +9,6 @@ import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import { useNavigate } from "react-router-dom";
 import UserCard from "./UserCard";
-import { UserRound } from "lucide-react";
 
 const EditProfile = ({ user }) => {
   const email = user.email;
