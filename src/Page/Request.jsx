@@ -1,122 +1,97 @@
-import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import { BASE_URL } from "../utils/constants";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { BASE_URL } from "../utils/constants";
+import { useDispatch, useSelector } from "react-redux";
+import { addRequests, removeRequest } from "../utils/requestSlice";
+import { useEffect, useState } from "react";
 
-const Request = () => {
-  const [requestUser, setRequestUser] = useState([]);
-  const user = useSelector((store) => store.user);
+const Requests = () => {
+  const requests = useSelector((store) => store.requests);
+  const dispatch = useDispatch();
 
-  async function handleRequest(userId, status) {
+  const reviewRequest = async (status, _id) => {
     try {
-      const res = await axios.post(
-        BASE_URL + "/request/review/" + status + "/" + userId,
+      const requestId = _id;
+      const res = axios.post(
+        BASE_URL + "/request/review/" + status + "/" + requestId,
         {},
         { withCredentials: true }
       );
-      toast.success(status);
-      // remove that user from feed
-      setRequestUser((prev) => prev.filter((u) => u._id !== userId));
-    } catch (error) {
-      console.log(`Error to send ${status} request`, error);
-      toast.error(
-        error?.response?.data?.message || `Failed to send ${status} request`
-      );
+      dispatch(removeRequest(_id));
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
 
-  const fetchRequest = async () => {
+  const fetchRequests = async () => {
     try {
       const res = await axios.get(BASE_URL + "/user/pending_request", {
         withCredentials: true,
       });
-      console.log("res", res);
-      setRequestUser(res.data.data);
-      console.log("requestUser", requestUser);
-    } catch (error) {
-      console.log("Error in Request Fetch", error);
-      toast.error(error?.response?.data?.message);
+
+      dispatch(addRequests(res.data.data));
+    } catch (err) {
+      console.log("Error", err);
     }
   };
 
   useEffect(() => {
-    fetchRequest();
-  }, [user]);
+    fetchRequests();
+  }, []);
+
+  if (!requests) return;
+
+  if (requests.length === 0)
+    return <h1 className="flex justify-center my-10"> No Requests Found</h1>;
 
   return (
-    <div className="w-full min-h-screen flex flex-col items-center pt-8 mb-12">
-      {requestUser.length === 0 ? (
-        <div className="text-xl font-bold ">
-          {user ? (
-            <>
-              No more users in feed ...
-              {/* <span className="loading loading-dots loading-xl ml-2"></span> */}
-            </>
-          ) : (
-            "Loading..."
-          )}
-        </div>
-      ) : (
-        requestUser.map((interestedUser) => (
-          <div
-            key={interestedUser._id}
-            className="card bg-base-200 w-96 shadow-sm mb-8"
-          >
-            <figure>
-              {interestedUser.fromUserId.photoUrl ? (
-                <img
-                  className="w-96 h-96 object-cover overflow-hidden"
-                  src={interestedUser.fromUserId.photoUrl}
-                  alt="user photo"
-                />
-              ) : (
-                <div className="w-full h-64 flex items-center justify-center bg-gray-200">
-                  No Photo
-                </div>
-              )}
-            </figure>
-            <div className="card-body ">
-              <div className=" flex justify-between items-center">
-                <h2 className="card-title">{`${
-                  interestedUser.fromUserId.firstName
-                } ${interestedUser?.fromUserId?.lastName || ""}`}
-                </h2>
-                <span className="card-title">
-                  age : {interestedUser.fromUserId.age}
-                </span>
-              </div>
+    <div className="text-center pt-10 pb-30 min-h-screen bg-[url(./assets/bg4.jpg)] bg-no-repeat bg-center bg-cover">
+      <h1 className="text-bold text-white text-2xl">Connection Requests</h1>
 
-              <p>{interestedUser.fromUserId.about}</p>
-              {interestedUser?.fromUserId?.skills?.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {interestedUser.fromUserId.skills.map((skill, i) => (
-                    <span key={i} className="badge badge-primary badge-outline">
-                      {skill}
-                    </span>
-                  ))}
+      {requests.map((request) => {
+        const { _id, firstName, lastName, photoUrl, age, gender, about } =
+          request.fromUserId;
+
+        return (
+          <div
+            key={_id}
+            className="h-auto m-4 flex justify-center items-center "
+          >
+            <div className="flex justify-center items-center p-4 rounded-lg bg-base-300">
+              <div>
+                <img
+                  alt="photo"
+                  className="w-20 h-20 rounded-full"
+                  src={photoUrl}
+                />
+              </div>
+              <div className="text-left mx-4">
+                <h2 className="font-bold text-xl">
+                  {firstName + " " + lastName}
+                </h2>
+                {age && gender && <p>{age + ", " + gender}</p>}
+                <div className="w-auto h-auto md:w-64 md:h-20 overflow-y-scroll p-2 border rounded">
+                  <p className="w-full overflow-hidden">{about}</p>
                 </div>
-              )}
-              <div className="card-actions justify-evenly mt-4">
+              </div>
+              <div className="flex flex-col gap-4 md:flex-row md:ml-8">
                 <button
-                  onClick={() => handleRequest(interestedUser._id, "accepted")}
-                  className="btn btn-primary"
-                >
-                  Accept
-                </button>
-                <button
-                  onClick={() => handleRequest(interestedUser._id, "rejected")}
-                  className="btn btn-secondary"
+                  className="btn btn-primary mx-2"
+                  onClick={() => reviewRequest("rejected", request._id)}
                 >
                   Reject
+                </button>
+                <button
+                  className="btn btn-secondary mx-2"
+                  onClick={() => reviewRequest("accepted", request._id)}
+                >
+                  Accept
                 </button>
               </div>
             </div>
           </div>
-        ))
-      )}
+        );
+      })}
     </div>
   );
 };
-
-export default Request;
+export default Requests;

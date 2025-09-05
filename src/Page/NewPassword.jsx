@@ -1,28 +1,31 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate ,useParams} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { BASE_URL } from "../utils/constants";
 
-
 const NewPassword = () => {
-  const {token} = useParams('');
-  const [password, setPassword] = useState("Radha@2002");
-  const [confirmPassword, setConfirmPassword] = useState("Radha@2002");
-  const [loading , setLoading] = useState(false);
+  const { token } = useParams("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!password || !confirmPassword) {
+      setError("All Fields are required !!");
+      return;
+    }
     if (password !== confirmPassword) {
-      toast.error("Password Not Match...");
+      setError("Password Not Match...");
       return;
     }
     try {
       setLoading(true);
       const res = await axios.put(
-         BASE_URL + "/new_password/"+ token,
+        BASE_URL + "/new_password/" + token,
         {
           password,
         },
@@ -35,13 +38,13 @@ const NewPassword = () => {
     } catch (error) {
       console.error(error);
       toast.error("Failed to Update Password");
-    } finally{
+    } finally {
       setLoading(false);
     }
   };
   return (
     <>
-      <div className="flex items-center justify-center w-100% h-[550px]">
+      <div className="flex items-center justify-center w-100% min-h-screen bg-[url(./assets/email.jpg)] bg-no-repeat bg-cover bg-center">
         <fieldset className="fieldset w-[300px]">
           <legend className="fieldset-legend text-xl text-center mb-1">
             New Password
@@ -63,15 +66,22 @@ const NewPassword = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          <div className="flex justify-center mt-4">
-            <button onClick={handleSubmit} className="btn btn-wide ">
+          
+          {error ? (
+            <div className="text-red-600 font-bold text-mg text-center">{error}</div>
+          ) : (
+            ""
+          )}
+          <div className="flex justify-center">
+            <button
+              onClick={handleSubmit}
+              className="w-full btn bg-orange-500 mt-4 font-bold rounded-3xl"
+            >
               Submit
             </button>
-            {
-            loading && (
-             <span class="loading loading-spinner loading-xl"></span>
-            )
-           }
+            {loading && (
+              <span class="loading loading-spinner loading-xl"></span>
+            )}
           </div>
         </fieldset>
       </div>

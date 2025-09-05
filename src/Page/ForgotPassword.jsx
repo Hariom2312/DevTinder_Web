@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
 import { BASE_URL } from "../utils/constants";
-
+import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
+  const navigate = useNavigate();
 
-  const [loading , setLoading] = useState(false);
-  const [email , setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -19,19 +21,22 @@ const ForgotPassword = () => {
         },
         { withCredentials: true }
       );
-      
-      toast.success("Send Email Successfully...");
+
+      setSuccess("Send Email Successfully ✅");
       console.log(res.data);
     } catch (error) {
+      if (error.status === 404) {
+        return navigate("/signup");
+      }
       console.error(error);
-      toast.error("Failed to send a email");
-    } finally{
+      setError("Failed to send a email ❌");
+    } finally {
       setLoading(false);
     }
   };
   return (
     <>
-      <div className="flex items-center justify-center w-100% h-[550px]">
+      <div className="flex items-center justify-center w-100% min-h-screen bg-[url(./assets/email.jpg)] bg-no-repeat bg-cover bg-center">
         <fieldset className="fieldset w-[300px]">
           <legend className="fieldset-legend text-xl text-center mb-1">
             Enter your Email ID
@@ -43,15 +48,29 @@ const ForgotPassword = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <div className="flex justify-center mt-4">
-            <button onClick={handleSubmit} className="btn btn-wide ">
+          {loading && (
+            <div className="flex justify-center mt-2">
+              {" "}
+              <span className="loading loading-spinner loading-xl "></span>
+            </div>
+          )}
+          {success && (
+            <div className="mt-2 text-green-700 text-[16px] font-bold text-center">
+              {success}
+            </div>
+          )}
+          {error && (
+            <div className="mt-2 text-red-700 text-[16px] font-bold text-center">
+              {error}
+            </div>
+          )}
+          <div className="flex justify-center ">
+            <button
+              onClick={handleSubmit}
+              className="w-full btn bg-orange-500 mt-4 font-bold rounded-3xl"
+            >
               Submit
             </button>
-            {
-            loading && (
-             <span class="loading loading-spinner loading-xl"></span>
-            )
-           }
           </div>
         </fieldset>
       </div>

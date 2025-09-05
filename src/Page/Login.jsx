@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import LoginImg from "../assets/loginImg.jpg";
+import LoginImg from "../assets/loginPage.png";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
@@ -10,8 +10,11 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { BASE_URL } from "../utils/constants";
 
 const Login = () => {
-  const [email, setEmail] = useState("Balram@gmail.com");
-  const [password, setPassword] = useState("Balram@2002");
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [eye, setEye] = useState(true);
@@ -19,9 +22,11 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error("All filed Required !");
+      setError("All fields are Required !!");
       return;
     }
+    setError("");
+    setLoading(true);
     try {
       const res = await axios.post(
         BASE_URL + "/login",
@@ -31,24 +36,24 @@ const Login = () => {
         },
         { withCredentials: true }
       );
-      console.log(res.data.data);
+      // console.log(res.data);
 
       const { token } = res.data;
       localStorage.setItem("token", token);
-      toast.success("Login Success ✅");
       dispatch(addUser(res.data.data));
-      // console.log("res.data.data",res.data.data);
       return navigate("/");
     } catch (error) {
-      console.log(error.res?.data || error.message);
-      toast.error(error.res?.message || "Login failed ❌");
+      console.log(error?.res?.data || error.message);
+      setError("Login failed ❌");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="h-[500px]">
-      <div className="hero bg-base-200 min-h-screen">
-        <div className="hero-content flex-col lg:flex-row-reverse">
+    <div className="min-h-screen bg-[url(./assets/bg2.jpg)] bg-no-repeat bg-cover bg-center">
+      <div className="min-h-screen">
+        <div className="hero-content flex-col lg:flex-row">
           <div className="text-center lg:text-left">
             <h1 className="text-3xl text-center text-bold mb-2">Login Now!</h1>
             <img
@@ -68,7 +73,7 @@ const Login = () => {
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                  />  
+                  />
                   <label className="label">Password</label>
                   <div className="flex justify-between">
                     <input
@@ -79,16 +84,38 @@ const Login = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
-                    <div onClick={()=>setEye(!eye)} className="flex items-center">{eye ? <VisibilityIcon/> : <VisibilityOffIcon/>}</div>
+                    <div
+                      onClick={() => setEye(!eye)}
+                      className="flex items-center"
+                    >
+                      {eye ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                    </div>
                   </div>
-                  <div>
                     <Link to="/forgot_password" className="link link-hover">
                       Forgot password?
                     </Link>
-                  </div>
-                  <button type="submit" className="btn btn-neutral mt-4">
+                  {loading && (
+                    <div className="flex justify-center mt-2">
+                      {" "}
+                      <span className="loading loading-spinner loading-xl "></span>
+                    </div>
+                  )}
+                  {error ? (
+                    <p className="text-[16px] text-red-500 text-center">
+                      {error}
+                    </p>
+                  ) : (
+                    ""
+                  )}
+                  <button
+                    type="submit"
+                    className="btn bg-orange-500 mt-4 font-bold rounded-full"
+                  >
                     Login
                   </button>
+                   <Link to="/signup" className="link link-hover text-center text-lg pt-4">
+                      New User? Signup here
+                    </Link>
                 </fieldset>
               </form>
             </div>

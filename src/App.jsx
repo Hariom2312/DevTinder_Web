@@ -7,12 +7,13 @@ import ForgotPassword from "./Page/ForgotPassword";
 import NewPassword from "./Page/NewPassword";
 import Feed from "./Page/Feed";
 import { ToastContainer } from "react-toastify";
-import EditProfile from "./Page/EditProfile";
 
 import { Provider } from "react-redux";
 import appStore from "./utils/appStore";
 import Request from "./Page/Request";
 import Friends from "./Page/Friends";
+import Signup from "./Page/Signup";
+import Chat from "./components/Chat";
 
 function App() {
   return (
@@ -24,16 +25,27 @@ function App() {
             <Route path="/" element={<Feed />} />
             <Route path="/login" element={<Login />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/editprofile" element={<EditProfile />} />
             <Route path="/request" element={<Request />} />
             <Route path="/friends" element={<Friends />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/chat/:id" element={<Chat />} />
           </Route>
 
           <Route path="/forgot_password" element={<ForgotPassword />} />
           <Route path="/new_password/:token" element={<NewPassword />} />
         </Routes>
       </BrowserRouter>
-      <ToastContainer />
+      <ToastContainer
+        toastOptions={{
+          success: {
+            duration: 1000,
+            iconTheme: {
+              primary: "green",
+              secondary: "black",
+            },
+          },
+        }}
+      />
     </Provider>
   );
 }

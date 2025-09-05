@@ -10,10 +10,11 @@ import { useEffect } from "react";
 const Body = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const userData = useSelector((store) => store.user);
+  const user = useSelector((store) => store.user);
 
   const fetchUser = async () => {
     try {
+      if(user) return;
       const res = await axios.get(BASE_URL + "/profile/view", {
         withCredentials: true,
       });
@@ -23,19 +24,17 @@ const Body = () => {
       if (error.status === 401) {
         return navigate("/login");
       }
-      console.log("Error in Body:", error?.response?.data?.message);
+      // console.log("Error in Body:", error?.response?.data?.message);
     }
   };
 
   useEffect(() => {
-    if (!userData) {
        fetchUser();
-    }
-  },[userData,dispatch,navigate]);
+  },[user]);
 
   return (
     <>
-      <Navbar />
+      <Navbar user={user}/>
       <Outlet />
       <Footer />
     </>
