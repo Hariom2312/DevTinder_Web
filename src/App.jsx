@@ -13,7 +13,8 @@ import appStore from "./utils/appStore";
 import Request from "./Page/Request";
 import Friends from "./Page/Friends";
 import Signup from "./Page/Signup";
-import Chat from "./components/Chat";
+import Premium from "./Page/Premium";
+import Chat from "./Page/Chat";
 
 function App() {
   return (
@@ -28,7 +29,8 @@ function App() {
             <Route path="/request" element={<Request />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/chat/:id" element={<Chat />} />
+            <Route path="/chat/:targetUserId" element={<Chat />} />
+            <Route path="/premium" element={<Premium />} />
           </Route>
 
           <Route path="/forgot_password" element={<ForgotPassword />} />

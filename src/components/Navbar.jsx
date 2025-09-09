@@ -74,6 +74,9 @@ const Navbar = ({user}) => {
                 <Link to="/">Feed</Link>
               </li>
               <li>
+                <Link to="/premium">premium</Link>
+              </li>
+              <li>
                 <Link to="/request">request</Link>
               </li>
               <li>

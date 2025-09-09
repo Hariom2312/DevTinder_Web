@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { addConnections } from "../utils/connectionSlice";
-
+import Chat from "./Chat";
 
 const Friends = () => {
   const [expanded, setExpanded] = useState({});
@@ -52,7 +52,7 @@ const Friends = () => {
             </div>
             <div className="text-left mx-4 ">
               <h2 className="font-bold text-xl">
-                {firstName + " " + lastName}
+                {firstName} {lastName || ""}
               </h2>
               {age && gender && <p>{age + ", " + gender}</p>}
               <p className="hidden sm:block overflow-hidden">
