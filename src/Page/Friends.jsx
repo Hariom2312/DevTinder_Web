@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { addConnections } from "../utils/connectionSlice";
-import Chat from "./Chat";
 
 const Friends = () => {
   const [expanded, setExpanded] = useState({});
+  const [lastMessages, setLastMessages] = useState({});
   const connections = useSelector((store) => store.connections);
+  const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
+
   const fetchConnections = async () => {
     if (connections) return;
     try {
@@ -18,7 +20,7 @@ const Friends = () => {
       });
       dispatch(addConnections(res?.data?.data));
     } catch (err) {
-      // console.error(err);
+      console.error("Error fetching connections", err);
     }
   };
 
@@ -26,56 +28,54 @@ const Friends = () => {
     fetchConnections();
   }, []);
 
-  if (!connections) return;
+  if (!connections) return null;
 
-  if (connections.length === 0) return <h1> No Connections Found</h1>;
+  if (connections.length === 0) return <h1>No Connections Found</h1>;
 
   return (
-    <div className="min-h-screen w-vw text-center py-10 px-2 bg-[url(./assets/bg.jpg)] bg-cover bg-no-repeat">
-      <h1 className="text-bold text-white text-3xl">Connections</h1>
+    <div className="min-h-screen w-full text-center py-10 px-2 bg-[url(./assets/bg.jpg)] bg-cover bg-no-repeat">
+      <h1 className="text-bold text-white text-3xl mb-6">Connections</h1>
 
       {connections.map((connection) => {
         const { _id, firstName, lastName, photoUrl, age, gender, about } =
           connection;
 
         return (
-          <div
+          <Link
             key={_id}
-            className="w-auto sm:w-[640px] mx-auto flex justify-center items-center m-4 p-4 rounded-lg bg-base-300"
+            to={"/chat/" + _id}
+            className="w-auto sm:w-[640px] mx-auto flex justify-between items-center m-4 p-4 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition"
           >
-            <div>
+            <div className="flex items-center gap-4">
               <img
                 alt="photo"
-                className="w-20 h-20 rounded-full object-cover"
+                className="w-16 h-16 rounded-full object-cover border border-gray-600"
                 src={photoUrl}
               />
+              <div className="text-left">
+                <h2 className="font-bold text-lg">
+                  {firstName} {lastName || ""}
+                </h2>
+                {age && gender && (
+                  <p className="text-sm text-gray-400">{age + ", " + gender}</p>
+                )}
+
+                {/* About / message preview */}
+
+                <p className="hidden sm:block text-sm text-gray-500 truncate w-48">
+                  {expanded[_id]
+                    ? about
+                    : about?.substring(0, 35) +
+                      (about?.length > 35 ? "..." : "")}
+                </p>
+              </div>
             </div>
-            <div className="text-left mx-4 ">
-              <h2 className="font-bold text-xl">
-                {firstName} {lastName || ""}
-              </h2>
-              {age && gender && <p>{age + ", " + gender}</p>}
-              <p className="hidden sm:block overflow-hidden">
-                {expanded[_id] ? about + " " : about.substring(0, 35) + "... "}
-                <button
-                  className=" border-b-1"
-                  onClick={() =>
-                    setExpanded((prev) => ({
-                      ...prev,
-                      [_id]: !prev[_id],
-                    }))
-                  }
-                >
-                  {expanded[_id] ? "Show less" : "Show more"}
-                </button>
-              </p>
+
+            {/* Right side actions */}
+            <div>
+              <button className="btn btn-primary text-sm">Chat</button>
             </div>
-            <Link to={"/chat/" + _id}>
-              <button className="btn btn-primary mt-2 sm:mt-0 ml-8 sm:mr-8">
-                Chat
-              </button>
-            </Link>
-          </div>
+          </Link>
         );
       })}
     </div>
